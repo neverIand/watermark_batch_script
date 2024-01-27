@@ -3,4 +3,6 @@
 *.zip
 *.png
 *.jpg
+*.spec
 __pycache__
+/build
