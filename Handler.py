@@ -4,7 +4,7 @@ import time
 
 import rarfile
 from watchdog.events import FileSystemEventHandler
-
+from concurrent.futures import ThreadPoolExecutor
 from utils import apply_watermark, compress_image, compress_and_move_folder
 
 
@@ -64,12 +64,28 @@ class Handler(FileSystemEventHandler):
                 else:
                     images_to_watermark = png_files
 
-                for image_path in images_to_watermark:
-                    apply_watermark(image_path, target_directory, self.config['WATERMARK_SCALE'])
+                # for image_path in images_to_watermark:
+                #     apply_watermark(image_path, target_directory, self.config['WATERMARK_SCALE'])
+
+                # Using ThreadPoolExecutor to apply watermark in parallel
+                with ThreadPoolExecutor(max_workers=self.config['MAX_WORKERS']) as executor:
+                    watermark_futures = [executor.submit(apply_watermark, image_path, target_directory,
+                                                         self.config['WATERMARK_SCALE'])
+                                         for image_path in images_to_watermark]
+
+                # Optionally, you can wait for all futures to complete
+                for future in watermark_futures:
+                    future.result()
 
                 # Compress all images into JPG format
-                for image_path in png_files:
-                    compress_image(image_path, self.config['OUTPUT_HEIGHT'], self.config['OUTPUT_QUALITY'])
+                # for image_path in png_files:
+                #     compress_image(image_path, self.config['OUTPUT_HEIGHT'], self.config['OUTPUT_QUALITY'])
+                with ThreadPoolExecutor(max_workers=self.config['MAX_WORKERS']) as executor:
+                    compress_futures = [executor.submit(compress_image, image_path, self.config['OUTPUT_HEIGHT'],
+                                                        self.config['OUTPUT_QUALITY'])
+                                        for image_path in png_files]
+                for future in compress_futures:
+                    future.result()
 
                 # After processing, move the original .rar file to the parent directory
                 parent_directory = os.path.dirname(target_directory)
