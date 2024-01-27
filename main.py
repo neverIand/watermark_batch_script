@@ -1,6 +1,7 @@
 from DirectoryWatcher import Watcher
 
 CONFIG = {
+    'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',
     'WATERMARK_SCALE': 0.075,
     'WATERMARK_OPACITY': 0.45,
     'OUTPUT_HEIGHT': 1200,
