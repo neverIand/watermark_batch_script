@@ -1,27 +1,29 @@
 import os
+import gui
 from DirectoryWatcher import Watcher
 
-CONFIG = {
+DEFAULT_CONFIG = {
     'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',
-    'WATERMARK_SCALE': 0.075,
+    'WATERMARK_SCALE': 7.5,
     'WATERMARK_OPACITY': 0.45,
     'OUTPUT_HEIGHT': 1200,
     'OUTPUT_QUALITY': 80,
     'PAGE_IGNORE_COUNT': 2,
-    'MAX_WORKERS': (os.cpu_count() or 4) * 2  # Example formula for I/O-bound tasks
+    'MAX_WORKERS': (os.cpu_count() or 4) * 2 - 1  # Example formula for I/O-bound tasks
 }
 
 
 def main():
     path_to_watch = "_target_"
     # os.chmod(path_to_watch, 0o777)  # set the dir to readable, writable and executable
-    print(f"Worker count: {CONFIG['MAX_WORKERS']}")
-    w = Watcher(path_to_watch, config=CONFIG)
+    print(f"Worker count: {DEFAULT_CONFIG['MAX_WORKERS']}")
+    w = Watcher(path_to_watch, config=DEFAULT_CONFIG)
     w.run()
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    gui.start_watcher()
 
 '''
 Steps to take (MVP):
@@ -35,7 +37,7 @@ TODO:
 1. More configurations:
     - refactor: break up the file and move configs to main or a single file (done)
     - support .jpg
-    - multithreading for adding watermark and compressing image
+    - multithreading for adding watermark and compressing image (done)
 
 2. Add a GUI
 

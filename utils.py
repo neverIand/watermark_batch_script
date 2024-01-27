@@ -59,7 +59,7 @@ def compress_image(image_path, output_height, output_quality):
 
             # Remove the original PNG file
             os.remove(image_path)
-            print(f"Original image removed: {image_path}")
+            # print(f"Original image removed: {image_path}")
 
     except Exception as e:
         print(f"Error in compressing {image_path}: {e}")
