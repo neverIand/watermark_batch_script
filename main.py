@@ -1,11 +1,18 @@
 from DirectoryWatcher import Watcher
-import os
+
+CONFIG = {
+    'WATERMARK_SCALE': 0.075,
+    'WATERMARK_OPACITY': 0.45,
+    'OUTPUT_HEIGHT': 1200,
+    'OUTPUT_QUALITY': 80,
+    'PAGE_IGNORE_COUNT': 2
+}
 
 
 def main():
     path_to_watch = "_target_"
     # os.chmod(path_to_watch, 0o777)  # set the dir to readable, writable and executable
-    w = Watcher(path_to_watch)
+    w = Watcher(path_to_watch, config=CONFIG)
     w.run()
 
 

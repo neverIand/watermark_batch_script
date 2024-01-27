@@ -10,22 +10,15 @@ from watchdog.events import FileSystemEventHandler
 # TODO: make the path to UNRAR_TOOL configurable
 rarfile.UNRAR_TOOL = 'C:\\Program Files\\WinRAR\\UnRAR.exe'  # Replace with the actual path
 
-WATERMARK_SCALE = 0.075
-WATERMARK_OPACITY = 0.45
-
-OUTPUT_HEIGHT = 1200
-OUTPUT_QUALITY = 80
-
-PAGE_IGNORE_COUNT = 2
-
 
 class Watcher:
-    def __init__(self, directory_to_watch):
+    def __init__(self, directory_to_watch, config):
         self.DIRECTORY_TO_WATCH = directory_to_watch
+        self.config = config
         self.observer = Observer()
 
     def run(self):
-        event_handler = Handler()
+        event_handler = Handler(self.config)
         self.observer.schedule(event_handler, self.DIRECTORY_TO_WATCH, recursive=True)
         self.observer.start()
         print(f"Observer started. Monitoring {self.DIRECTORY_TO_WATCH}")
@@ -40,13 +33,13 @@ class Watcher:
 
 
 # TODO: make the path to watermarked image configurable
-def apply_watermark(image_path, target_directory):
+def apply_watermark(image_path, target_directory, watermark_scale):
     watermark_path = os.path.join(target_directory, 'watermark.png')
     try:
         with Image.open(image_path) as base_image:
             with Image.open(watermark_path).convert("RGBA") as watermark:
                 # Resize watermark to 15% of its original size
-                watermark_size = tuple(int(dim * WATERMARK_SCALE) for dim in watermark.size)
+                watermark_size = tuple(int(dim * watermark_scale) for dim in watermark.size)
                 watermark = watermark.resize(watermark_size, Image.Resampling.LANCZOS)
 
                 # Adjust watermark opacity to 45%
@@ -70,7 +63,7 @@ def apply_watermark(image_path, target_directory):
         print(f"Error in applying watermark to {image_path}: {e}")
 
 
-def compress_image(image_path, output_height=OUTPUT_HEIGHT):
+def compress_image(image_path, output_height, output_quality):
     try:
         with Image.open(image_path) as img:
             # Calculate the target size maintaining the aspect ratio
@@ -88,7 +81,7 @@ def compress_image(image_path, output_height=OUTPUT_HEIGHT):
             output_path = os.path.splitext(image_path)[0] + '.jpg'
 
             # Save the image in JPG format
-            resized_img.save(output_path, "JPEG", quality=OUTPUT_QUALITY)
+            resized_img.save(output_path, "JPEG", quality=output_quality)
             print(f"Image compressed and saved as: {output_path}")
 
             # Remove the original PNG file
@@ -130,18 +123,18 @@ def compress_and_move_folder(folder_to_compress, final_zip_directory, zip_name):
 
 
 class Handler(FileSystemEventHandler):
+    def __init__(self, config):
+        self.config = config
 
-    @staticmethod
-    def on_any_event(event):
+    def on_any_event(self, event):
         if event.is_directory or not event.event_type == 'created':
             return None
 
         if event.src_path.endswith('.rar'):
             print(f"RAR file detected: {event.src_path}")
-            Handler.extract_rar(event.src_path)
+            Handler.extract_rar(self, event.src_path, self.config['PAGE_IGNORE_COUNT'])
 
-    @staticmethod
-    def extract_rar(file_path):
+    def extract_rar(self, file_path, page_ignore_count):
         # Wait for a short period to ensure file is not being written to
         time.sleep(2)
 
@@ -177,7 +170,7 @@ class Handler(FileSystemEventHandler):
 
                 # Ensure PAGE_IGNORE_COUNT is within valid range
                 total_png_count = len(png_files)
-                page_ignore_count = max(0, min(PAGE_IGNORE_COUNT, total_png_count))
+                page_ignore_count = max(0, min(page_ignore_count, total_png_count))
 
                 # Apply watermark to the appropriate number of files
                 if page_ignore_count > 0:
@@ -186,11 +179,11 @@ class Handler(FileSystemEventHandler):
                     images_to_watermark = png_files
 
                 for image_path in images_to_watermark:
-                    apply_watermark(image_path, target_directory)
+                    apply_watermark(image_path, target_directory, self.config['WATERMARK_SCALE'])
 
                 # Compress all images into JPG format
                 for image_path in png_files:
-                    compress_image(image_path)
+                    compress_image(image_path, self.config['OUTPUT_HEIGHT'], self.config['OUTPUT_QUALITY'])
 
                 # After processing, move the original .rar file to the parent directory
                 parent_directory = os.path.dirname(target_directory)
