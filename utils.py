@@ -30,7 +30,7 @@ def apply_watermark(image_path, target_directory, watermark_scale):
 
                 # Overwrite the original image
                 base_image.save(image_path, "PNG")
-                print(f"Watermark applied and original image replaced: {image_path}")
+                # print(f"Watermark applied and original image replaced: {image_path}")
 
     except Exception as e:
         print(f"Error in applying watermark to {image_path}: {e}")
@@ -46,8 +46,16 @@ def compress_image(image_path, output_height, output_quality):
             # Resize the image
             resized_img = img.resize((output_width, output_height), Image.Resampling.LANCZOS)
 
-            # Convert RGBA to RGB if necessary
-            if resized_img.mode == 'RGBA':
+            # Check if the image has an alpha channel
+            if resized_img.mode == 'RGBA' or resized_img.mode == 'LA':
+                # Create a white background image
+                background = Image.new('RGB', resized_img.size, (255, 255, 255))
+                # Composite the resized image onto the background
+                # This checks if the image has an alpha channel and uses it as a mask
+                background.paste(resized_img, mask=resized_img.getchannel('A'))  # Safely get the alpha channel
+                resized_img = background
+            else:
+                # If not 'LA' or 'RGBA', convert other modes directly to 'RGB' (this includes 'L' mode)
                 resized_img = resized_img.convert('RGB')
 
             # Define the output path for the JPG file
@@ -55,7 +63,7 @@ def compress_image(image_path, output_height, output_quality):
 
             # Save the image in JPG format
             resized_img.save(output_path, "JPEG", quality=output_quality)
-            print(f"Image compressed and saved as: {output_path}")
+            # print(f"Image compressed and saved as: {output_path}")
 
             # Remove the original PNG file
             os.remove(image_path)
@@ -89,7 +97,7 @@ def compress_and_move_folder(folder_to_compress, final_zip_directory, zip_name):
 
         # Step 3: Delete the original folder after successful zipping
         shutil.rmtree(folder_to_compress)
-        print(f"Original folder deleted: {folder_to_compress}")
+        # print(f"Original folder deleted: {folder_to_compress}")
 
     except Exception as e:
         print(f"Error during compression or folder deletion: {e}")

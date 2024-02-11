@@ -6,3 +6,4 @@
 *.spec
 __pycache__
 /build
+.idea/workspace.xml
