@@ -3,9 +3,10 @@ import shutil
 import time
 import py7zr
 import rarfile
+import zipfile
 from watchdog.events import FileSystemEventHandler
 from concurrent.futures import ThreadPoolExecutor
-from utils import apply_watermark, compress_image, compress_and_move_folder
+from utils import apply_watermark, compress_image, compress_and_move_folder, support_gbk
 
 
 class Handler(FileSystemEventHandler):
@@ -22,6 +23,9 @@ class Handler(FileSystemEventHandler):
         elif event.src_path.endswith('.7z'):
             print(f"7z file detected: {event.src_path}")
             self.extract_7z(event.src_path)
+        elif event.src_path.endswith('.zip'):
+            print(f"ZIP file detected: {event.src_path}")
+            self.extract_zip(event.src_path)
 
     def extract_rar(self, file_path):
         # Initial delay for file write completion
@@ -68,35 +72,66 @@ class Handler(FileSystemEventHandler):
             # This catches any other general exception
             print(f"Unexpected error during 7z extraction: {e}")
 
+    def extract_zip(self, file_path):
+        time.sleep(2)  # Delay to ensure the file is not being written to
+
+        target_directory = os.path.dirname(os.path.abspath(file_path))
+        try:
+            with support_gbk(zipfile.ZipFile(file_path, 'r')) as zip_ref:
+                zip_ref.extractall(target_directory)
+            print(f"Extracted: {file_path}")
+
+            extracted_subdir = self.determine_extracted_subdirectory(file_path, target_directory)
+            if extracted_subdir:
+                self.process_extracted_files(extracted_subdir, target_directory, file_path)
+
+        except Exception as e:
+            print(f"Error during ZIP extraction: {e}")
+
     def determine_extracted_subdirectory(self, file_path, target_directory):
         extracted_subdir = None
+        extracted_dir_path = ""  # Default to empty string
+
+        # Handling for RAR files
         if file_path.endswith('.rar'):
             with rarfile.RarFile(file_path) as archive_file:
-                first_extracted_file = archive_file.infolist()[0].filename
+                all_names = [f.filename for f in archive_file.infolist()]
+                first_extracted_file = all_names[0] if all_names else None
+
+        # Handling for 7z files
         elif file_path.endswith('.7z'):
             with py7zr.SevenZipFile(file_path, mode='r') as archive_file:
                 all_names = archive_file.getnames()
                 first_extracted_file = next(iter(all_names), None)
-                if first_extracted_file:
-                    # Attempt to find a common base directory if there is one
-                    common_dir = os.path.commonprefix(all_names)
-                    if common_dir:
-                        extracted_subdir = os.path.join(target_directory, common_dir)
-                    else:
-                        extracted_dir_path = os.path.dirname(first_extracted_file) or ""
+
+        # Handling for ZIP files
+        elif file_path.endswith('.zip'):
+            with support_gbk(zipfile.ZipFile(file_path, 'r')) as archive_file:
+                all_names = archive_file.namelist()
+                first_extracted_file = next(iter(all_names), None)
+
         else:
             print(f"Unsupported file type: {file_path}")
             return None
 
+        if first_extracted_file:
+            # Attempt to find a common base directory if there is one
+            common_dir = os.path.commonprefix(all_names).rstrip("/\\")
+            if common_dir:
+                # For archives where a common directory exists
+                extracted_subdir = os.path.join(target_directory, common_dir)
+            else:
+                # For archives without a common subdirectory, or if the archive is flat
+                extracted_dir_path = os.path.dirname(first_extracted_file) or ""
+                if extracted_dir_path:
+                    extracted_subdir = os.path.join(target_directory, extracted_dir_path)
+                else:
+                    # Default to the target directory if the first file is at the root
+                    extracted_subdir = target_directory
+
         # Debug prints
         print("Target Directory:", target_directory)
-        print("Extracted Directory Path:", extracted_dir_path if 'extracted_dir_path' in locals() else "N/A")
-
-        if not extracted_subdir:  # If not already determined by common prefix
-            if extracted_dir_path:
-                extracted_subdir = os.path.join(target_directory, extracted_dir_path)
-            else:
-                extracted_subdir = target_directory
+        print("Extracted Directory Path:", extracted_subdir if extracted_subdir else "N/A")
 
         return extracted_subdir
 

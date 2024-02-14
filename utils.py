@@ -1,7 +1,7 @@
 import os
 import shutil
 import zipfile
-
+from zipfile import ZipFile
 from PIL import Image
 
 
@@ -101,3 +101,16 @@ def compress_and_move_folder(folder_to_compress, final_zip_directory, zip_name):
 
     except Exception as e:
         print(f"Error during compression or folder deletion: {e}")
+
+
+# credit: https://blog.csdn.net/qq_21076851/article/details/122752196
+def support_gbk(zip_file: ZipFile):
+    name_to_info = zip_file.NameToInfo
+
+    for name, info in name_to_info.copy().items():
+        real_name = name.encode('cp437').decode('gbk')
+        if real_name != name:
+            info.filename = real_name
+            del name_to_info[name]
+            name_to_info[real_name] = info
+    return zip_file
