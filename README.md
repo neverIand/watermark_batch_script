@@ -4,7 +4,7 @@ This script is just for my personal use and is developed for a specific workflow
 
 ## Run the script
 - Put the watermark inside `/_target_`
-- Start the script and specify the path to UnRAR.exe
+- Run `main.py` and specify the path to UnRAR.exe
 - Drag .zip, .rar or .7z containing images into `/_target_` folder. You can drag multiple files at a time as long as you have enough RAM
 - Wait
 - The output .rar file will appear at the root folder.
