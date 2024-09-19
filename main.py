@@ -2,8 +2,12 @@ import os
 import gui
 from DirectoryWatcher import Watcher
 
+
+default_watermark_path = os.path.join(os.path.dirname(os.path.abspath('_target_')), '_target_', 'watermark.png')
+
 DEFAULT_CONFIG = {
     'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',
+    'WATERMARK_FILE': default_watermark_path,
     'WATERMARK_SCALE': 7.5,
     'WATERMARK_OPACITY': 0.45,
     'OUTPUT_HEIGHT': 1200,
@@ -38,8 +42,7 @@ TODO:
     - refactor: break up the file and move configs to main or a single file (done)
     - support .jpg
     - multithreading for adding watermark and compressing image (done)
-
-2. Add a GUI
-
-3. Batch process (multiple rar files?)
+    - configurable path for watermark
+    - gui refactor (remove hardcoded row number)
+    - improve gui (more responsive layout)
 '''

@@ -90,7 +90,6 @@ class Handler(FileSystemEventHandler):
 
     def determine_extracted_subdirectory(self, file_path, target_directory):
         extracted_subdir = None
-        extracted_dir_path = ""  # Default to empty string
 
         # Handling for RAR files
         if file_path.endswith('.rar'):
@@ -157,7 +156,7 @@ class Handler(FileSystemEventHandler):
         # Using ThreadPoolExecutor to apply watermark in parallel
         with ThreadPoolExecutor(max_workers=self.config['MAX_WORKERS']) as executor:
             watermark_futures = [executor.submit(apply_watermark, image_path, target_directory,
-                                                 self.config['WATERMARK_SCALE'])
+                                                 self.config['WATERMARK_SCALE'], self.config['WATERMARK_FILE'])
                                  for image_path in images_to_watermark]
 
         # Optionally, you can wait for all futures to complete
@@ -179,7 +178,7 @@ class Handler(FileSystemEventHandler):
         print(f"Original file moved to: {new_location}")
 
         # Determine the final destination directory for the zip file (outside _target_)
-        final_zip_directory = ""  # Replace with your desired path
+        final_zip_directory = ""  # Replace with your desired path (!Not used at the moment)
         zip_name = os.path.basename(extracted_subdir)  # Example: use the name of the extracted folder
         # print(f"zip_name: {zip_name}")
 

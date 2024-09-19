@@ -5,31 +5,76 @@ from zipfile import ZipFile
 from PIL import Image
 
 
-# TODO?: make the path to watermarked image configurable
-def apply_watermark(image_path, target_directory, watermark_scale):
-    watermark_path = os.path.join(target_directory, 'watermark.png')
+# TODO: remove unused variable, apply custom config for opacity
+
+
+def apply_watermark(image_path, target_directory, watermark_scale, watermark_file):
+    # TODO: replace watermark_scale with configurable width (200px right now)
+    """
+    Applies a watermark to an image, resizing the watermark to 330px wide while maintaining aspect ratio.
+
+    Parameters:
+    - image_path (str): Path to the base image.
+    - target_directory (str): Directory where the processed image will be saved.
+    - watermark_file (str): Path to the watermark image.
+
+    Returns:
+    - None
+    """
+    # print('Watermark file:', watermark_file)
+    watermark_path = watermark_file  # Removed dependency on target_directory
+
     try:
         with Image.open(image_path) as base_image:
             with Image.open(watermark_path).convert("RGBA") as watermark:
-                # Resize watermark to 15% of its original size
-                watermark_size = tuple(int(dim * watermark_scale) for dim in watermark.size)
-                watermark = watermark.resize(watermark_size, Image.Resampling.LANCZOS)
+                # Define the desired watermark width
+                desired_width = 200  # TODO
+
+                # Calculate the scaling factor to maintain aspect ratio
+                original_width, original_height = watermark.size
+                scaling_factor = desired_width / original_width
+                new_height = int(original_height * scaling_factor)
+
+                # Resize the watermark to the desired width while maintaining aspect ratio
+                watermark = watermark.resize((desired_width, new_height), Image.Resampling.LANCZOS)
 
                 # Adjust watermark opacity to 45%
-                watermark = watermark.copy()  # Create a copy to modify
+
+                # Ensure the watermark has an alpha channel
+                if watermark.mode != 'RGBA':
+                    watermark = watermark.convert('RGBA')
+
+                # Split the watermark into its component bands
                 bands = list(watermark.split())
-                bands[3] = bands[3].point(lambda x: x * 0.45)
+                # Modify the alpha band to set opacity to 45%
+                bands[3] = bands[3].point(lambda x: x * 0.75)
+                # Merge the bands back together
                 watermark = Image.merge('RGBA', bands)
 
                 # Position watermark at the bottom-right corner of the base image
-                watermark_position = (base_image.size[0] - watermark_size[0],
-                                      base_image.size[1] - watermark_size[1])
+                base_width, base_height = base_image.size
+                watermark_width, watermark_height = watermark.size
+                margin = 10  # Margin from the edges
 
-                # Create a new image by combining base image and watermark
-                base_image.paste(watermark, watermark_position, watermark)
+                watermark_position = (
+                    base_width - watermark_width - margin,
+                    base_height - watermark_height - margin
+                )
+
+                # watermark_position = (0, 0) # testing only
+
+                # Create a transparent layer the size of the base image to hold the watermark
+                transparent = Image.new('RGBA', base_image.size)
+                transparent.paste(watermark, watermark_position, watermark)
+
+                # Combine the base image with the watermark
+                combined = Image.alpha_composite(base_image.convert('RGBA'), transparent)
+
+                # Ensure the target directory exists
+                os.makedirs(target_directory, exist_ok=True)
 
                 # Overwrite the original image
-                base_image.save(image_path, "PNG")
+                combined.convert('RGB').save(image_path, "PNG")
                 # print(f"Watermark applied and original image replaced: {image_path}")
 
     except Exception as e:
