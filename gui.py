@@ -93,7 +93,7 @@ def validate_between_zero_and_one(v):
         return True  # Allow empty temporary input
     try:
         num = float(v)
-        return 0 < num <= 1
+        return 0 <= num <= 1
     except ValueError:
         return False
 

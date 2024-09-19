@@ -9,7 +9,7 @@ DEFAULT_CONFIG = {
     'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',
     'WATERMARK_FILE': default_watermark_path,
     'WATERMARK_SIZE': 200,
-    'WATERMARK_OPACITY': 0.45,
+    'WATERMARK_OPACITY': 0.75,
     'OUTPUT_HEIGHT': 1200,
     'OUTPUT_QUALITY': 80,
     'PAGE_IGNORE_COUNT': 2,
@@ -41,8 +41,6 @@ TODO:
 1. More configurations:
     - refactor: break up the file and move configs to main or a single file (done)
     - support .jpg
-    - multithreading for adding watermark and compressing image (done)
-    - configurable path for watermark
     - gui refactor (remove hardcoded row number)
     - improve gui (more responsive layout)
 '''

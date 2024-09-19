@@ -156,7 +156,8 @@ class Handler(FileSystemEventHandler):
         # Using ThreadPoolExecutor to apply watermark in parallel
         with ThreadPoolExecutor(max_workers=self.config['MAX_WORKERS']) as executor:
             watermark_futures = [executor.submit(apply_watermark, image_path, target_directory,
-                                                 self.config['WATERMARK_SIZE'], self.config['WATERMARK_FILE'])
+                                                 self.config['WATERMARK_SIZE'], self.config['WATERMARK_FILE'],
+                                                 self.config['WATERMARK_OPACITY'])
                                  for image_path in images_to_watermark]
 
         # Optionally, you can wait for all futures to complete
