@@ -56,16 +56,18 @@ def stop_watcher():
 
 def select_unrar_tool_path():
     path = filedialog.askopenfilename(filetypes=[("Executable files", "*.exe")])
-    # TODO: handle empty input (e.g. user clicked cancel and did not pick anything)
-    unrar_tool_entry.delete(0, tk.END)
-    unrar_tool_entry.insert(0, path)
+    # handle empty input (e.g. user clicked cancel and did not pick anything)
+    if path != '':
+        unrar_tool_entry.delete(0, tk.END)
+        unrar_tool_entry.insert(0, path)
 
 
 def select_watermark_file_path():
     path = filedialog.askopenfilename(filetypes=[("Image files", "*.png")])
-    # TODO: handle empty input (e.g. user clicked cancel and did not pick anything)
-    watermark_path_entry.delete(0, tk.END)
-    watermark_path_entry.insert(0, path)
+    # handle empty input (e.g. user clicked cancel and did not pick anything)
+    if path != '':
+        watermark_path_entry.delete(0, tk.END)
+        watermark_path_entry.insert(0, path)
 
 
 def validate_larger_than_zero(v):

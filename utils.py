@@ -5,17 +5,15 @@ from zipfile import ZipFile
 from PIL import Image
 
 
-# TODO: remove unused variable, apply custom config for opacity
-
-
 def apply_watermark(image_path, target_directory, watermark_width, watermark_file, watermark_opacity):
     """
     Applies a watermark to an image, resizing the watermark to 330px wide while maintaining aspect ratio.
 
     Parameters:
     - image_path (str): Path to the base image.
-    - target_directory (str): Directory where the processed image will be saved.
+    - target_directory (str): NOT USED AT THE MOMENT (images will be overwritten after watermarked)
     - watermark_file (str): Path to the watermark image.
+    - watermark_opacity (float)
 
     Returns:
     - None
