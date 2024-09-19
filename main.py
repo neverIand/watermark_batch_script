@@ -8,7 +8,7 @@ default_watermark_path = os.path.join(os.path.dirname(os.path.abspath('_target_'
 DEFAULT_CONFIG = {
     'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',
     'WATERMARK_FILE': default_watermark_path,
-    'WATERMARK_SCALE': 7.5,
+    'WATERMARK_SIZE': 200,
     'WATERMARK_OPACITY': 0.45,
     'OUTPUT_HEIGHT': 1200,
     'OUTPUT_QUALITY': 80,

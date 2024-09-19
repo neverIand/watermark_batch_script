@@ -8,8 +8,7 @@ from PIL import Image
 # TODO: remove unused variable, apply custom config for opacity
 
 
-def apply_watermark(image_path, target_directory, watermark_scale, watermark_file):
-    # TODO: replace watermark_scale with configurable width (200px right now)
+def apply_watermark(image_path, target_directory, watermark_width, watermark_file):
     """
     Applies a watermark to an image, resizing the watermark to 330px wide while maintaining aspect ratio.
 
@@ -28,7 +27,7 @@ def apply_watermark(image_path, target_directory, watermark_scale, watermark_fil
         with Image.open(image_path) as base_image:
             with Image.open(watermark_path).convert("RGBA") as watermark:
                 # Define the desired watermark width
-                desired_width = 200  # TODO
+                desired_width = watermark_width  # TODO
 
                 # Calculate the scaling factor to maintain aspect ratio
                 original_width, original_height = watermark.size

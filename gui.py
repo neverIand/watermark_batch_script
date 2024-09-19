@@ -18,7 +18,7 @@ def start_watcher():
         config = {
             'unrar_tool': unrar_tool_entry.get(),
             'WATERMARK_FILE': watermark_path_entry.get(),
-            'WATERMARK_SCALE': float(watermark_scale_entry.get()) / 100,
+            'WATERMARK_SIZE': int(watermark_scale_entry.get()),
             'WATERMARK_OPACITY': float(watermark_opacity_entry.get()),
             'OUTPUT_HEIGHT': int(output_height_entry.get()),
             'OUTPUT_QUALITY': int(output_quality_entry.get()),
@@ -138,11 +138,11 @@ watermark_path_entry.insert(0, DEFAULT_CONFIG['WATERMARK_FILE'])
 # TODO increase row count (manually)
 
 # Watermark Size Entry
-tk.Label(root, text="Watermark Size (%):").grid(row=2, column=0)
+tk.Label(root, text="Watermark Size (px):").grid(row=2, column=0)
 watermark_scale_entry = tk.Entry(root, validate="key", validatecommand=(root.register(validate_larger_than_zero), '%P'))
 watermark_scale_entry.grid(row=2, column=1)
 # Setting default value
-watermark_scale_entry.insert(0, str(DEFAULT_CONFIG['WATERMARK_SCALE']))
+watermark_scale_entry.insert(0, str(DEFAULT_CONFIG['WATERMARK_SIZE']))
 
 # Watermark Opacity
 tk.Label(root, text="Watermark Opacity (0~1):").grid(row=3, column=0)
