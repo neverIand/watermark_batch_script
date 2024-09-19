@@ -41,6 +41,5 @@ TODO:
 1. More configurations:
     - refactor: break up the file and move configs to main or a single file (done)
     - support .jpg
-    - gui refactor (remove hardcoded row number)
     - improve gui (more responsive layout)
 '''

@@ -121,64 +121,98 @@ root.title("Script Configuration")
 
 # TODO: better input validation
 
-# TODO: replace hardcoded row and column using a for loop
+# Define UI fields
+fields = [
+    {
+        'label': "UnRAR Tool Path:",
+        'variable': 'unrar_tool_entry',
+        'default': DEFAULT_CONFIG['unrar_tool'],
+        'browse': select_unrar_tool_path,
+        'validate': None
+    },
+    {
+        'label': "Watermark Path:",
+        'variable': 'watermark_path_entry',
+        'default': DEFAULT_CONFIG['WATERMARK_FILE'],
+        'browse': select_watermark_file_path,
+        'validate': None
+    },
+    {
+        'label': "Watermark Size (px):",
+        'variable': 'watermark_scale_entry',
+        'default': str(DEFAULT_CONFIG['WATERMARK_SIZE']),
+        'validate': validate_larger_than_zero
+    },
+    {
+        'label': "Watermark Opacity (0~1):",
+        'variable': 'watermark_opacity_entry',
+        'default': str(DEFAULT_CONFIG['WATERMARK_OPACITY']),
+        'validate': validate_between_zero_and_one
+    },
+    {
+        'label': "Output Image Height (px):",
+        'variable': 'output_height_entry',
+        'default': str(DEFAULT_CONFIG['OUTPUT_HEIGHT']),
+        'validate': validate_larger_than_zero
+    },
+    {
+        'label': "Output Image Quality (1~100):",
+        'variable': 'output_quality_entry',
+        'default': str(DEFAULT_CONFIG['OUTPUT_QUALITY']),
+        'validate': validate_between_one_and_one_hundred
+    },
+    {
+        'label': "Number of Credit Page (>=0):",
+        'variable': 'page_ignore_count_entry',
+        'default': str(DEFAULT_CONFIG['PAGE_IGNORE_COUNT']),
+        'validate': validate_larger_equal_than_zero
+    }
+]
 
-# UnRAR Tool Path
-tk.Label(root, text="UnRAR Tool Path:").grid(row=0, column=0)
-unrar_tool_entry = tk.Entry(root)
-unrar_tool_entry.grid(row=0, column=1)
-tk.Button(root, text="Browse", command=select_unrar_tool_path).grid(row=0, column=2)
-unrar_tool_entry.insert(0, DEFAULT_CONFIG['unrar_tool'])
+# Dictionary to hold entry widgets
+entries = {}
 
-# Watermark File Path
-tk.Label(root, text="Watermark Path:").grid(row=1, column=0)
-watermark_path_entry = tk.Entry(root)
-watermark_path_entry.grid(row=1, column=1)
-tk.Button(root, text="Browse", command=select_watermark_file_path).grid(row=1, column=2)
-watermark_path_entry.insert(0, DEFAULT_CONFIG['WATERMARK_FILE'])
+# Create UI elements dynamically
+for idx, field in enumerate(fields):
+    # Label
+    tk.Label(root, text=field['label']).grid(row=idx, column=0, padx=5, pady=5, sticky='e')
 
-# Watermark Size Entry
-tk.Label(root, text="Watermark Size (px):").grid(row=2, column=0)
-watermark_scale_entry = tk.Entry(root, validate="key", validatecommand=(root.register(validate_larger_than_zero), '%P'))
-watermark_scale_entry.grid(row=2, column=1)
-# Setting default value
-watermark_scale_entry.insert(0, str(DEFAULT_CONFIG['WATERMARK_SIZE']))
+    # Validation setup
+    if field['validate']:
+        vcmd = (root.register(field['validate']), '%P')
+        entry = tk.Entry(root, validate="key", validatecommand=vcmd)
+    else:
+        entry = tk.Entry(root)
 
-# Watermark Opacity
-tk.Label(root, text="Watermark Opacity (0~1):").grid(row=3, column=0)
-watermark_opacity_entry = tk.Entry(root, validate="key",
-                                   validatecommand=(root.register(validate_between_zero_and_one), '%P'))
-watermark_opacity_entry.grid(row=3, column=1)
-watermark_opacity_entry.insert(0, str(DEFAULT_CONFIG['WATERMARK_OPACITY']))
+    entry.grid(row=idx, column=1, padx=5, pady=5, sticky='we')
+    entry.insert(0, field['default'])
+    entries[field['variable']] = entry
 
-# Output image height in pixels
-tk.Label(root, text="Output Image Height (px):").grid(row=4, column=0)
-output_height_entry = tk.Entry(root, validate="key",
-                               validatecommand=(root.register(validate_larger_than_zero), '%P'))
-output_height_entry.grid(row=4, column=1)
-output_height_entry.insert(0, str(DEFAULT_CONFIG['OUTPUT_HEIGHT']))
+    # Browse button if applicable
+    if 'browse' in field and field['browse']:
+        browse_button = tk.Button(root, text="Browse", command=field['browse'])
+        browse_button.grid(row=idx, column=2, padx=5, pady=5, sticky='w')
 
-# Output image quality
-tk.Label(root, text="Output Image Quality (1~100):").grid(row=5, column=0)
-output_quality_entry = tk.Entry(root, validate="key",
-                                validatecommand=(root.register(validate_between_one_and_one_hundred), '%P'))
-output_quality_entry.grid(row=5, column=1)
-output_quality_entry.insert(0, str(DEFAULT_CONFIG['OUTPUT_QUALITY']))
+# Assign entries to variables
+unrar_tool_entry = entries['unrar_tool_entry']
+watermark_path_entry = entries['watermark_path_entry']
+watermark_scale_entry = entries['watermark_scale_entry']
+watermark_opacity_entry = entries['watermark_opacity_entry']
+output_height_entry = entries['output_height_entry']
+output_quality_entry = entries['output_quality_entry']
+page_ignore_count_entry = entries['page_ignore_count_entry']
 
-# Number of credit page
-tk.Label(root, text="Number of Credit Page (>=0):").grid(row=6, column=0)
-page_ignore_count_entry = tk.Entry(root, validate="key",
-                                   validatecommand=(root.register(validate_larger_equal_than_zero), '%P'))
-page_ignore_count_entry.grid(row=6, column=1)
-page_ignore_count_entry.insert(0, str(DEFAULT_CONFIG['PAGE_IGNORE_COUNT']))
+# Configure column weights for responsive design
+root.columnconfigure(1, weight=1)
 
-# Start Button
-start_button = tk.Button(root, text="Start", command=start_watcher)
-start_button.grid(row=7, column=1)
+# Start and Stop buttons
+button_frame = tk.Frame(root)
+button_frame.grid(row=len(fields), column=0, columnspan=3, pady=10)
 
-# Stop Button
-stop_button = tk.Button(root, text="Stop", command=stop_watcher)
-stop_button.grid(row=7, column=2)
-stop_button.config(state='disabled')
+start_button = tk.Button(button_frame, text="Start", command=start_watcher)
+start_button.pack(side='left', padx=5)
+
+stop_button = tk.Button(button_frame, text="Stop", command=stop_watcher, state='disabled')
+stop_button.pack(side='left', padx=5)
 
 root.mainloop()
