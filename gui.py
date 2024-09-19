@@ -1,5 +1,4 @@
 import os
-import sys
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -50,14 +49,15 @@ def stop_watcher():
         watcher_thread.join()  # Wait for the thread to finish
         watcher_thread = None
         watcher = None  # Reset the watcher instance
-        start_button.config(state='normal')  # Re-enable the start button
+        start_button.config(state='normal')  # Re-enable start button
+        stop_button.config(state='disabled')  # Re-disable stop button
         print("Watcher stopped")
 
 
 def select_unrar_tool_path():
     path = filedialog.askopenfilename(filetypes=[("Executable files", "*.exe")])
     # handle empty input (e.g. user clicked cancel and did not pick anything)
-    if path != '':
+    if path:
         unrar_tool_entry.delete(0, tk.END)
         unrar_tool_entry.insert(0, path)
 
@@ -65,7 +65,7 @@ def select_unrar_tool_path():
 def select_watermark_file_path():
     path = filedialog.askopenfilename(filetypes=[("Image files", "*.png")])
     # handle empty input (e.g. user clicked cancel and did not pick anything)
-    if path != '':
+    if path:
         watermark_path_entry.delete(0, tk.END)
         watermark_path_entry.insert(0, path)
 
@@ -137,8 +137,6 @@ watermark_path_entry.grid(row=1, column=1)
 tk.Button(root, text="Browse", command=select_watermark_file_path).grid(row=1, column=2)
 watermark_path_entry.insert(0, DEFAULT_CONFIG['WATERMARK_FILE'])
 
-# TODO increase row count (manually)
-
 # Watermark Size Entry
 tk.Label(root, text="Watermark Size (px):").grid(row=2, column=0)
 watermark_scale_entry = tk.Entry(root, validate="key", validatecommand=(root.register(validate_larger_than_zero), '%P'))
@@ -154,7 +152,7 @@ watermark_opacity_entry.grid(row=3, column=1)
 watermark_opacity_entry.insert(0, str(DEFAULT_CONFIG['WATERMARK_OPACITY']))
 
 # Output image height in pixels
-tk.Label(root, text="Output Image Height (pixel):").grid(row=4, column=0)
+tk.Label(root, text="Output Image Height (px):").grid(row=4, column=0)
 output_height_entry = tk.Entry(root, validate="key",
                                validatecommand=(root.register(validate_larger_than_zero), '%P'))
 output_height_entry.grid(row=4, column=1)
