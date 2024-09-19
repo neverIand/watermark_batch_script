@@ -1,5 +1,5 @@
 # README
-A simple python script that adds watermark to images and compress them back to .rar files. Requires UnRAR.exe.
+A simple python script that adds watermark to images and compress them back to .zip files. Requires UnRAR.exe.
 This script is just for my personal use and is developed for a specific workflow.
 
 ## Run the script
