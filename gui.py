@@ -111,6 +111,8 @@ def validate_between_one_and_one_hundred(v):
 
 root = tk.Tk()
 root.title("Script Configuration")
+root.geometry("600x300")  # Set an initial size
+root.minsize(400, 300)  # Set a minimum size to prevent too small windows
 
 # Path
 # tk.Label(root, text="Path to Watch:").grid(row=0, column=0)
@@ -202,16 +204,35 @@ output_quality_entry = entries['output_quality_entry']
 page_ignore_count_entry = entries['page_ignore_count_entry']
 
 # Configure column weights for responsive design
-root.columnconfigure(1, weight=1)
+root.columnconfigure(0, weight=0)  # Labels don't need to expand
+root.columnconfigure(1, weight=1)  # Entries expand horizontally
+root.columnconfigure(2, weight=0)  # Browse buttons don't need to expand
+
+# Configure row weights for vertical responsiveness
+for idx in range(len(fields)):
+    root.rowconfigure(idx, weight=0)  # Fields have fixed height
+root.rowconfigure(len(fields), weight=1)  # Extra space below fields
 
 # Start and Stop buttons
 button_frame = tk.Frame(root)
-button_frame.grid(row=len(fields), column=0, columnspan=3, pady=10)
+button_frame.grid(row=len(fields), column=0, columnspan=3, pady=10, sticky='ew')
+
+# Make the button frame expand horizontally
+button_frame.columnconfigure(0, weight=1)
+button_frame.columnconfigure(1, weight=1)
 
 start_button = tk.Button(button_frame, text="Start", command=start_watcher)
-start_button.pack(side='left', padx=5)
+start_button.grid(row=0, column=0, padx=5, pady=5, sticky='e')
 
 stop_button = tk.Button(button_frame, text="Stop", command=stop_watcher, state='disabled')
-stop_button.pack(side='left', padx=5)
+stop_button.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+
+# Optionally, add a status bar or additional widgets that can expand
+# status_var = tk.StringVar(value="Ready")
+# status_bar = tk.Label(root, textvariable=status_var, bd=1, relief='sunken', anchor='w')
+# status_bar.grid(row=len(fields)+1, column=0, columnspan=3, sticky='we')
+
+# Configure the status bar to expand horizontally
+root.rowconfigure(len(fields) + 1, weight=0)
 
 root.mainloop()
