@@ -26,8 +26,7 @@ def start_watcher():
         }
         print(config)
 
-        # TODO: unify this path
-        path_to_watch = "_target_"
+        path_to_watch = DEFAULT_CONFIG['WORKING_DIR']  # hardcoded at the moment
         watcher = Watcher(path_to_watch, config)
 
         # Run watcher in a separate thread

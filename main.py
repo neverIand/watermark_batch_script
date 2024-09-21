@@ -2,11 +2,13 @@ import os
 import gui
 from DirectoryWatcher import Watcher
 
-
-default_watermark_path = os.path.join(os.path.dirname(os.path.abspath('_target_')), '_target_', 'watermark.png')
+default_working_dir = '_target_'
+default_watermark_path = os.path.join(os.path.dirname(os.path.abspath(default_working_dir)), default_working_dir,
+                                      'watermark.png')
 
 DEFAULT_CONFIG = {
-    'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',
+    'unrar_tool': 'C:\\Program Files\\WinRAR\\UnRAR.exe',  # TODO: improve default UbRAR path
+    'WORKING_DIR': default_working_dir,
     'WATERMARK_FILE': default_watermark_path,
     'WATERMARK_SIZE': 200,
     'WATERMARK_OPACITY': 0.75,
@@ -18,7 +20,7 @@ DEFAULT_CONFIG = {
 
 
 def main():
-    path_to_watch = "_target_"
+    path_to_watch = DEFAULT_CONFIG['WORKING_DIR']
     # os.chmod(path_to_watch, 0o777)  # set the dir to readable, writable and executable
     print(f"Worker count: {DEFAULT_CONFIG['MAX_WORKERS']}")
     w = Watcher(path_to_watch, config=DEFAULT_CONFIG)
